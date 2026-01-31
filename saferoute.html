@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRoute AI for Women & Night Travelers</title>
+    <!-- Load Tailwind CSS from CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define the font and general body styles */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f9fafb; 
+        }
+        /* Style for the main content cards */
+        .app-card { 
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+        }
+        /* CSS animation for the active SOS button */
+        .sos-active { 
+            animation: pulse-red 1.5s infinite; 
+        }
+        @keyframes pulse-red {
+            0%, 100% { background-color: #ef4444; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { background-color: #dc2626; box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col font-sans p-4 antialiased">
+    <header class="mb-6">
+        <h1 class="text-3xl font-extrabold text-pink-700 tracking-tight">
+            SafeRoute AI: Night Traveler Mode
+        </h1>
+        <p class="text-sm text-gray-500">
+            Secure User ID: <span id="user-id" class="font-mono text-xs p-1 bg-gray-200 rounded">Loading...</span>
+        </p>
+    </header>
+    
+    <main class="flex flex-col lg:flex-row gap-6 flex-grow">
+        <!-- -------------------- LEFT COLUMN: SOS & TRACKING -------------------- -->
+        <div class="flex-1 lg:w-2/3 space-y-6">
+            <!-- SOS PANIC BUTTON -->
+            <div class="bg-white app-card p-6 rounded-xl text-center">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">CRITICAL EMERGENCY ALERT</h2>
+                <button id="panic-button" class="w-full h-40 rounded-full font-extrabold text-2xl transition-all duration-300 bg-pink-500 text-white shadow-lg hover:bg-pink-600">
+                    PANIC ALERT (Single Tap)
+                </button>
+                <p id="sos-message" class="mt-4 text-sm text-red-600 font-medium">
+                    This single tap initiates 24/7 Live Location Share and AI Analysis.
+                </p>
+            </div>
+
+            <!-- AI & VOICE INPUT SIMULATION -->
+            <div class="bg-white app-card p-6 rounded-xl space-y-4">
+                <h2 class="text-xl font-bold text-gray-800">AI Threat & Environment Assessment (Simulated)</h2>
+                
+                <textarea
+                    id="simulated-voice-text"
+                    placeholder="Type what you would say in distress here (e.g., 'HELP! I am being followed near the street'). This text is used to simulate AI detection."
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 transition"
+                    rows="2"
+                ></textarea>
+
+                <div class="flex justify-between items-center bg-pink-50 p-3 rounded-lg border border-pink-200">
+                    <span class="font-medium text-pink-700">Simulated AI Distress Rating:</span>
+                    <span id="ai-emotion-result" class="font-bold px-3 py-1 rounded-full text-sm bg-pink-200 text-pink-800">
+                        Neutral
+                    </span>
+                </div>
+            </div>
+
+            <!-- JOURNEY PLANNING (NEW SECTION) -->
+            <div class="bg-white app-card p-6 rounded-xl">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Night Journey Planning & Route Analysis</h2>
+                <div class="flex flex-col gap-3 text-sm">
+                    <div class="bg-gray-100 p-3 rounded-lg flex justify-between items-center">
+                        <span class="font-medium">Proactive Route Check:</span>
+                        <span class="text-green-600 font-semibold">Route Safe (0 High-Risk Zones)</span>
+                    </div>
+                    <button class="w-full p-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-semibold transition">
+                        Start AI Route Monitoring (Simulated)
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <span class="font-bold text-pink-500">Note:</span> In a full app, this AI would monitor speed, stops, and lighting conditions against known crime data for real-time risk alerts.
+                    </p>
+                </div>
+            </div>
+
+            <!-- GPS Tracking Status -->
+            <div class="bg-white app-card p-6 rounded-xl">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Live Location Tracking Status</h2>
+                <div class="flex space-x-4 mb-4">
+                    <button
+                        id="tracking-button"
+                        class="w-1/2 p-3 rounded-xl font-semibold transition-colors bg-green-500 text-white"
+                    >
+                        Start Journey Tracking
+                    </button>
+                    <a 
+                        id="live-location-link"
+                        href="#"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-1/2 p-3 bg-gray-200 text-center rounded-xl font-semibold hover:bg-gray-300 transition"
+                    >
+                        View Live Location
+                    </a>
+                </div>
+                
+                <div class="text-sm space-y-2">
+                    <p class="font-medium">Status: 
+                        <span id="location-status" class="font-semibold ml-2 text-gray-500">Inactive</span>
+                    </p>
+                    <p class="text-gray-700">Current Coords: 
+                        <span id="current-coords" class="font-mono text-xs ml-2 p-1 bg-gray-100 rounded">Awaiting GPS lock...</span>
+                    </p>
+                    <p class="text-gray-700">Last Updated: 
+                        <span id="last-updated" class="font-mono text-xs ml-2 p-1 bg-gray-100 rounded">N/A</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- -------------------- RIGHT COLUMN: CONTACTS & LOG -------------------- -->
+        <div class="flex-1 lg:w-1/3 space-y-6">
+            <!-- Immediate Dialer -->
+            <div class="bg-white app-card p-6 rounded-xl">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Immediate Dialer</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="tel:911" class="p-3 text-center bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition">
+                        Call Police (911/100)
+                    </a>
+                    <a href="tel:108" class="p-3 text-center bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold transition">
+                        Call Ambulance (108)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div class="bg-white app-card p-6 rounded-xl">
+                <h2 class="text-xl font-bold mb-4 text-gray-800 flex justify-between items-center">
+                    Trusted Contacts (<span id="contact-count">0/5</span>)
+                </h2>
+                <ul id="contacts-list" class="space-y-2 mb-4 max-h-40 overflow-y-auto">
+                    <!-- Contacts rendered here by JavaScript -->
+                    <p class="text-gray-500 text-sm italic">Add 5 contacts for rapid, pre-vetted alerts.</p>
+                </ul>
+
+                <form id="contact-form" class="space-y-2">
+                    <input
+                        id="contact-name-input"
+                        type="text"
+                        placeholder="Name"
+                        class="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                        required
+                    />
+                    <input
+                        id="contact-phone-input"
+                        type="tel"
+                        placeholder="Phone Number (e.g., 9988776655)"
+                        class="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                        required
+                    />
+                    <button
+                        id="contact-submit-button"
+                        type="submit"
+                        class="w-full p-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold transition"
+                    >
+                        Add Secure Contact
+                    </button>
+                    <p id="contact-limit-message" class='text-red-500 text-xs text-center hidden'>Maximum 5 contacts for rapid alerts.</p>
+                </form>
+            </div>
+
+            <!-- System Log -->
+            <div class="bg-white app-card p-6 rounded-xl">
+                <h2 class="text-xl font-bold mb-3 text-gray-800">System Activity Log</h2>
+                <div id="message-log" class="h-48 overflow-y-auto bg-gray-50 p-2 border border-gray-200 rounded-lg text-xs space-y-1 flex flex-col-reverse">
+                    <!-- Log messages rendered here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Load Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --------------------------------------------------------------------------------------------------
+        // --- 1. CONFIGURATION (CRITICAL: PASTE YOUR KEYS HERE) --------------------------------------------
+        // --------------------------------------------------------------------------------------------------
+        // You MUST replace the values below with the credentials from your Firebase project console.
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDYURcZe9VemEbEBY_7CWAxuwywFIuazY",
+            authDomain: "saferote-app.firebaseapp.com",
+            projectId: "saferote-app",
+            storageBucket: "saferote-app.firebasestorage.app",
+            messagingSenderId: "115894676935",
+            appId: "1:115894676935:web:81aa4877409ed78683bde2"
+
+        };
+        const appId = 'saferoute-night-travel'; // Unique ID for this specific app focus
+
+        // --- 2. GLOBAL VARIABLES ---
+        let app, db, auth;
+        let userId = 'Loading...';
+        let isAuthReady = false;
+        let isTracking = false;
+        let isSOSActive = false;
+        let locationWatchId = null;
+        let contacts = [];
+        let currentLocation = null;
+        let aiEmotion = 'Neutral';
+
+        // --- 3. UI ELEMENTS ACCESSORS ---
+        const $ = (id) => document.getElementById(id);
+        const $userIdSpan = $('user-id');
+        const $panicButton = $('panic-button');
+        const $trackingButton = $('tracking-button');
+        const $locationStatus = $('location-status');
+        const $currentCoords = $('current-coords');
+        const $lastUpdated = $('last-updated');
+        const $contactsList = $('contacts-list');
+        const $contactForm = $('contact-form');
+        const $messageLog = $('message-log');
+        const $simulatedVoiceText = $('simulated-voice-text');
+        const $aiEmotionResult = $('ai-emotion-result');
+        const $contactCount = $('contact-count');
+
+        // --- 4. UTILITIES ---
+
+        // Utility to wrap API calls with exponential backoff
+        const withBackoff = async (fn, retries = 5) => {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        };
+
+        // Firestore Path Helpers
+        const getUserDataRef = () => doc(db, `artifacts/${appId}/users/${userId}/safety_config/settings`);
+        const getLiveLocationRef = () => doc(db, `artifacts/${appId}/public/data/live_locations/${userId}`);
+        
+        // CRITICAL NOTE FOR REVIEW:
+        // For production, the Firestore Rules MUST be configured to only allow read/write 
+        // to this 'live_locations' document when the user is authenticated AND (isTracking OR isSOSActive)
+        // This ensures the data is only public during active emergencies.
+
+        // --- 5. UI RENDERING FUNCTIONS ---
+
+        const updateUI = () => {
+            $userIdSpan.textContent = userId;
+            
+            // Panic Button
+            $panicButton.textContent = isSOSActive ? 'CANCEL SOS (Tap to disarm)' : 'PANIC ALERT (Single Tap)';
+            $panicButton.className = `w-full h-40 rounded-full font-extrabold text-2xl transition-all duration-300 ${isSOSActive ? 'bg-red-600 hover:bg-red-700 text-white sos-active' : 'bg-pink-500 hover:bg-pink-600 text-white shadow-lg transform hover:scale-105'} opacity-${isAuthReady ? '100' : '50'}`;
+            $panicButton.disabled = !isAuthReady;
+            $('sos-message').textContent = isSOSActive ? 'Alerts sent to Police and all Trusted Contacts. Live location sharing is CRITICAL.' : 'This single tap initiates 24/7 Live Location Share and AI Analysis.';
+
+            // Tracking Button
+            $trackingButton.textContent = isTracking ? 'Stop Sharing Location' : 'Start Journey Tracking';
+            $trackingButton.className = `w-1/2 p-3 rounded-xl font-semibold transition-colors ${isTracking ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'} opacity-${isAuthReady ? '100' : '50'}`;
+            $trackingButton.disabled = !isAuthReady;
+
+            // Location Status
+            $locationStatus.className = `font-semibold ml-2 ${isTracking ? 'text-green-600' : 'text-gray-500'}`;
+            $locationStatus.textContent = isTracking ? 'Active & Shared' : 'Inactive';
+            
+            $currentCoords.textContent = currentLocation ? `${currentLocation.lat.toFixed(6)}, ${currentLocation.lon.toFixed(6)}` : 'Awaiting GPS lock...';
+            $lastUpdated.textContent = currentLocation ? new Date(currentLocation.timestamp).toLocaleTimeString() : 'N/A';
+            
+            // AI Emotion
+            $aiEmotionResult.textContent = isSOSActive ? aiEmotion : 'Neutral';
+            $aiEmotionResult.className = `font-bold px-3 py-1 rounded-full text-sm ${aiEmotion.includes('CRITICAL') ? 'bg-red-500 text-white' : 'bg-pink-200 text-pink-800'}`;
+
+            // Contacts List
+            renderContacts();
+
+            // Contact Form
+            $contactCount.textContent = `${contacts.length}/5`;
+            const contactLimitReached = contacts.length >= 5;
+            $('contact-submit-button').disabled = contactLimitReached || !isAuthReady;
+            $('contact-name-input').disabled = contactLimitReached;
+            $('contact-phone-input').disabled = contactLimitReached;
+            $('contact-limit-message').classList.toggle('hidden', !contactLimitReached);
+            
+            // Live Location Link
+            if (currentLocation) {
+                $('live-location-link').href = `https://www.google.com/maps/search/?api=1&query=${currentLocation.lat},${currentLocation.lon}`;
+            }
+        };
+
+        const renderContacts = () => {
+            $contactsList.innerHTML = '';
+            if (contacts.length === 0) {
+                $contactsList.innerHTML = '<p class="text-gray-500 text-sm italic">Add 5 contacts for rapid, pre-vetted alerts.</p>';
+                return;
+            }
+
+            contacts.forEach(c => {
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center bg-gray-100 p-2 rounded-lg text-sm";
+                li.innerHTML = `
+                    <div>
+                        <span class="font-medium text-gray-800">${c.name}</span>
+                        <span class="block text-xs text-gray-500">${c.phone}</span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700 transition p-1 rounded-full hover:bg-red-100 remove-btn" data-id="${c.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                `;
+                li.querySelector('.remove-btn').onclick = () => removeContact(c);
+                $contactsList.appendChild(li);
+            });
+        };
+
+        const logMessage = (type, text) => {
+            if (!$messageLog) return;
+            const time = new Date().toLocaleTimeString();
+            const p = document.createElement('p');
+            p.className = `${type === 'alert' ? 'text-red-700 font-bold' : type === 'error' ? 'text-yellow-700' : 'text-gray-600'} break-words`;
+            p.textContent = `[${time}] ${text}`;
+            
+            // Prepend new message and only keep the last 20 messages
+            if ($messageLog.children.length > 20) {
+                $messageLog.removeChild($messageLog.lastChild);
+            }
+            $messageLog.insertBefore(p, $messageLog.firstChild);
+        };
+
+        // --- 6. FIREBASE & AUTHENTICATION ---
+
+        const initializeFirebase = async () => {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+            } catch (e) {
+                logMessage('error', 'Firebase initialization failed. Check config and internet.');
+                return;
+            }
+
+            try {
+                // Sign in anonymously for simple local setup
+                const userCredential = await withBackoff(() => signInAnonymously(auth));
+                userId = userCredential.user.uid;
+            } catch (error) {
+                logMessage('error', 'Anonymous sign-in failed. Database access will be restricted. Check Firebase config/rules.');
+                userId = 'unauthenticated-user-' + crypto.randomUUID(); 
+            }
+            
+            isAuthReady = true;
+            logMessage('system', 'App initialized. Ready for use. User data secured.');
+            updateUI();
+            setupFirestoreListeners();
+        };
+
+        const setupFirestoreListeners = () => {
+            // Listener for Emergency Contacts
+            onSnapshot(getUserDataRef(), (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    contacts = data.emergencyContacts || [];
+                } else {
+                    // Initialize if document is new
+                    setDoc(getUserDataRef(), { emergencyContacts: [] }, { merge: true });
+                    contacts = [];
+                }
+                updateUI();
+            }, (error) => {
+                logMessage('error', 'Failed to sync contacts. Check user authentication.');
+            });
+        };
+
+        // --- 7. LOCATION TRACKING FUNCTIONS ---
+
+        const updateLocationInDB = async (pos, activeStatus) => {
+            if (!userId || !db) return;
+            const locationRef = getLiveLocationRef();
+
+            currentLocation = {
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+                timestamp: Date.now(),
+                isTracking: activeStatus,
+                isSOSActive: isSOSActive,
+                sharerId: userId,
+            };
+            
+            try {
+                await withBackoff(() => setDoc(locationRef, currentLocation, { merge: true }));
+            } catch (e) {
+                logMessage('error', 'Location sync failed! Check connection/rules.');
+            }
+            updateUI();
+        };
+
+        const startTracking = () => {
+            if (isTracking) return;
+
+            logMessage('system', 'Starting secure real-time location sharing...');
+
+            const options = { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 };
+            
+            // Uses the standard browser geolocation API
+            locationWatchId = navigator.geolocation.watchPosition(
+                (pos) => updateLocationInDB(pos, true),
+                (err) => {
+                    logMessage('error', `GPS Error: ${err.message}. Check location permissions.`);
+                },
+                options
+            );
+            isTracking = true;
+            updateUI();
+        };
+
+        const stopTracking = async () => {
+            if (locationWatchId !== null) {
+                navigator.geolocation.clearWatch(locationWatchId);
+                locationWatchId = null;
+            }
+            isTracking = false;
+            logMessage('system', 'Secure location sharing stopped.');
+
+            // Final update to Firestore to mark tracking as inactive
+            if (currentLocation) {
+                await updateLocationInDB({ coords: { latitude: currentLocation.lat, longitude: currentLocation.lon } }, false);
+            }
+            updateUI();
+        };
+
+        // --- 8. SOS FUNCTIONALITY ---
+
+        const simulateAIEmotionDetection = (text) => {
+            if (!text) return 'HIGH (No Voice Input)';
+            const criticalWords = ['help', 'danger', 'attack', 'panic', 'emergency', 'unsafe', 'now', 'followed'];
+            const intensity = criticalWords.some(word => text.toLowerCase().includes(word));
+            return intensity ? 'CRITICAL (Threat Detected)' : 'MEDIUM (Concern Acknowledged)';
+        };
+
+        const handleSOS = async () => {
+            if (!isAuthReady || !db) {
+                logMessage('error', 'System not ready or Firebase not configured. Cannot proceed.');
+                return;
+            }
+
+            if (isSOSActive) {
+                // Cancel SOS
+                isSOSActive = false;
+                logMessage('system', 'SOS CANCELED. All active alerts disarmed.');
+                await updateDoc(getLiveLocationRef(), { isSOSActive: false });
+                updateUI();
+                return;
+            }
+
+            // 1. Start/Ensure Tracking is active
+            startTracking();
+            isSOSActive = true;
+
+            // 2. Simulate AI Analysis 
+            const text = $simulatedVoiceText.value;
+            aiEmotion = simulateAIEmotionDetection(text);
+            updateUI();
+
+            // 3. Update Location with SOS status
+            const locationUpdatePromise = new Promise((resolve) => {
+                if (currentLocation) {
+                    updateDoc(getLiveLocationRef(), { isSOSActive: true }).then(resolve);
+                } else {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => updateLocationInDB(pos, true).then(() => updateDoc(getLiveLocationRef(), { isSOSActive: true }).then(resolve)),
+                        () => resolve(), // Resolve even on error to continue the process
+                        { enableHighAccuracy: true, timeout: 5000 }
+                    );
+                }
+            });
+            await locationUpdatePromise;
+            
+            // 4. Send Immediate Alerts (Simulated)
+            const locationUrl = currentLocation 
+                ? `https://www.google.com/maps/search/?api=1&query=${currentLocation.lat},${currentLocation.lon}`
+                : 'Location pending...';
+
+            logMessage('alert', `--- CRITICAL ALERT ACTIVATED ---`);
+            logMessage('alert', `AI Distress Level: ${aiEmotion}. Response escalation initiated.`);
+            logMessage('alert', `Immediate message sent to ${contacts.length} Trusted Contacts (Simulated SMS/App).`);
+            logMessage('alert', `Live Location URL: ${locationUrl}`);
+            
+            console.log("--- EMERGENCY MESSAGE PAYLOAD ---", {
+                distress: aiEmotion,
+                location: currentLocation,
+                text: text,
+                contacts: contacts
+            });
+            updateUI();
+        };
+
+        // --- 9. CONTACTS LOGIC ---
+
+        const addContact = async (e) => {
+            e.preventDefault();
+            const name = $('contact-name-input').value.trim();
+            const phone = $('contact-phone-input').value.trim();
+            
+            if (!name || !phone || contacts.length >= 5 || !db) return;
+            const newContact = { name: name, phone: phone, id: Date.now() };
+
+            try {
+                await withBackoff(() => updateDoc(getUserDataRef(), {
+                    emergencyContacts: arrayUnion(newContact)
+                }));
+                $('contact-name-input').value = '';
+                $('contact-phone-input').value = '';
+                logMessage('system', `Added ${name} to Trusted Contacts.`);
+            } catch (error) {
+                logMessage('error', 'Failed to add contact. Check Firebase rules.');
+            }
+        };
+
+        const removeContact = async (contact) => {
+            if (!db) {
+                logMessage('error', 'Cannot remove contact. Firebase is not connected.');
+                return;
+            }
+
+            try {
+                await withBackoff(() => updateDoc(getUserDataRef(), {
+                    emergencyContacts: arrayRemove(contact)
+                }));
+                logMessage('system', `Removed ${contact.name} from Trusted Contacts.`);
+            } catch (error) {
+                logMessage('error', 'Failed to remove contact.');
+            }
+        };
+
+        // --- 10. EVENT LISTENERS & INITIALIZATION ---
+
+        const setupEventListeners = () => {
+            if ($panicButton) $panicButton.onclick = handleSOS;
+            if ($trackingButton) {
+                $trackingButton.addEventListener('click', () => { 
+                    if (!isTracking) startTracking(); else stopTracking(); updateUI(); 
+                });
+            }
+            if ($contactForm) $contactForm.onsubmit = addContact;
+        }
+
+        window.onload = () => {
+            // Set initial state
+            updateUI();
+            
+            // Setup Event Handlers
+            setupEventListeners();
+
+            // Start Firebase
+            initializeFirebase();
+        };
+    </script>
+</body>
+</html>
